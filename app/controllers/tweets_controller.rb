@@ -24,6 +24,11 @@ class TweetsController < ApplicationController
     @tweet = Tweet.new(tweet_params)
 
     if @tweet.save
+      if session[:authored_ids]
+        session[:authored_ids].push(@tweet.id)
+      else
+        session[:authored_ids] = [@tweet.id]
+      end
       redirect_to @tweet, notice: "Tweet was successfully created."
     else
       render :new, status: :unprocessable_content
@@ -41,8 +46,12 @@ class TweetsController < ApplicationController
 
   # DELETE /tweets/1
   def destroy
-    @tweet.destroy!
-    redirect_to tweets_path, notice: "Tweet was successfully destroyed.", status: :see_other
+    if session[:authored_ids] && session[:authored_ids].include?(@tweet.id)
+      @tweet.destroy!
+      redirect_to tweets_path, notice: "Tweet was successfully destroyed.", status: :see_other
+    else
+      redirect_to @tweet, alert: "You are not allowed to delete this tweet.", status: :see_other
+    end
   end
 
   private
