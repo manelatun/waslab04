@@ -1,5 +1,5 @@
 class TweetsController < ApplicationController
-  before_action :set_tweet, only: %i[ show edit update destroy ]
+  before_action :set_tweet, only: %i[ show edit update destroy like ]
 
   # GET /tweets
   def index
@@ -52,6 +52,19 @@ class TweetsController < ApplicationController
     else
       redirect_to @tweet, alert: "You are not allowed to delete this tweet.", status: :see_other
     end
+  end
+
+  def like
+    if !session[:liked_ids] || !session[:liked_ids].include?(@tweet.id)
+      @tweet.likes += 1
+      @tweet.save
+      if session[:liked_ids]
+        session[:liked_ids].push(@tweet.id)
+      else
+        session[:liked_ids] = [@tweet.id]
+      end
+    end
+    redirect_to root_path, status: :see_other
   end
 
   private
