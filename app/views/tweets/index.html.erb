@@ -1,20 +1,40 @@
-<p style="color: green"><%= notice %></p>
+<div class="container">
+  <h1 class="wottitle">Wall of Tweets · RoR Edition</h1>
+  <div class="subtitle">A minimal wall for quick thoughts. Clean and focused.</div>
 
-<% content_for :title, "Tweets" %>
+  <% if notice.present? %>
+    <div class="flash"><span class="ok"><%= notice %></span></div>
+  <% end %>
+  <% if alert.present? %>
+    <div class="flash flash--alert">
+      <% Array(alert).each do |msg| %>
+        <span class="err"><%= msg %></span>
+      <% end %>
+    </div>
+  <% end %>
 
-<h1>Tweets</h1>
+  <div class="walltweet">
+    <%= form_with model: @tweet do |form| %>
+      <div class="form-grid">
+        <div class="form-row">
+          <%= form.label :author, "Your name:" %>
+          <%= form.text_field :author, placeholder: "Serious Contributor" %>
+        </div>
+        <div class="form-row">
+          <%= form.label :content, "Your tweet:" %>
+          <%= form.textarea :content, placeholder: "Share something concise and useful…" %>
+        </div>
+        <div class="actions">
+          <%= form.submit "Tweet!" %>
+        </div>
+      </div>
+    <% end %>
+  </div>
 
-<div id="tweets">
-  <% @tweets.each do |tweet| %>
-    <%= render tweet %>
-    <p>
-      <%= button_to 'Like this tweet', like_tweet_path(tweet), method: :put %>
-    </p>
-    <p>
-      <%= link_to "Show this tweet", tweet %>
-    </p>
-    <hr>
+  <% @tweets.group_by { |t| t.created_at.to_date }.each do |date, tweets| %>
+    <div class="date-sep"><%= date.strftime("%A, %B %-d, %Y") %></div>
+    <% tweets.each do |tweet| %>
+      <%= render tweet %>
+    <% end %>
   <% end %>
 </div>
-
-<%= link_to "New tweet", new_tweet_path %>

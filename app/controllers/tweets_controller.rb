@@ -4,6 +4,7 @@ class TweetsController < ApplicationController
   # GET /tweets
   def index
     @tweets = Tweet.order(created_at: :desc)
+    @tweet = Tweet.new
   end
 
   # GET /tweets/1
@@ -29,9 +30,11 @@ class TweetsController < ApplicationController
       else
         session[:authored_ids] = [@tweet.id]
       end
-      redirect_to @tweet, notice: "Tweet was successfully created."
+      redirect_to root_path, notice: "Tweet was successfully created."
     else
-      render :new, status: :unprocessable_content
+      @tweets = Tweet.order(created_at: :desc)
+      flash.now[:alert] = @tweet.errors.full_messages
+      render :index, status: :unprocessable_content
     end
   end
 
@@ -48,9 +51,9 @@ class TweetsController < ApplicationController
   def destroy
     if session[:authored_ids] && session[:authored_ids].include?(@tweet.id)
       @tweet.destroy!
-      redirect_to tweets_path, notice: "Tweet was successfully destroyed.", status: :see_other
+      redirect_to root_path, notice: "Tweet was successfully destroyed.", status: :see_other
     else
-      redirect_to @tweet, alert: "You are not allowed to delete this tweet.", status: :see_other
+      redirect_to root_path, alert: "You are not allowed to delete this tweet.", status: :see_other
     end
   end
 
